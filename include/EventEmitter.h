@@ -6,6 +6,7 @@
 #include <memory>
 #include <typeinfo>
 #include <typeindex>
+#include <string>
 
 namespace medooze 
 {
@@ -48,7 +49,7 @@ public:
 	template<typename Type>
 	void emit(Type& type) 
 	{
-		auto it = listeners.find(typeid(type));
+		auto it = listeners.find(typeid(Type).name());
 		if (it!=listeners.end())
 			static_cast<Listener<Type>*>(it->second.get())->emit(type);
 	}
@@ -56,11 +57,11 @@ public:
 	template<typename Type>
 	EventEmitter& on(const std::function<void (Type&)> &callback) 
 	{
-		listeners[typeid(Type)] = std::unique_ptr<BaseListener>(new Listener<Type>(callback));
+		listeners[typeid(Type).name()] = std::unique_ptr<BaseListener>(new Listener<Type>(callback));
 		return *this;
 	}
 private:
-	std::map<std::type_index,std::unique_ptr<BaseListener>> listeners;
+	std::map<std::string,std::unique_ptr<BaseListener>> listeners;
 };
 
 }; // namespace medooze
